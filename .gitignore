@@ -1,0 +1,8 @@
+data/AutomateTemp/
+node_modules/
+output/final_output/*.json
+output/real_data/*.json
+output/rejected/*.txt
+output/resolved/*.json
+output/resolved_sql/*.sql
+output/searchProducts_Output/*.txt

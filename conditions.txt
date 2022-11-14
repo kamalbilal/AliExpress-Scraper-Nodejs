@@ -1,0 +1,1 @@
+In db modifiedDescription == null ==> then dont display description
