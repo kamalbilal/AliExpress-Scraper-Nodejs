@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "node script.js",
+    "dev": "node main.js",
     "start": "node main.js"
   },
   "license": "MIT",
