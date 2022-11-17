@@ -135,10 +135,27 @@ const queries = [
   ` CREATE TABLE shop.t_users (
       id SERIAL PRIMARY KEY,
       email character varying(100) unique,
-      password varchar(75),
-      cart jsonb[] DEFAULT null
+      password varchar(75)
+      );`,
+  // data jsonb DEFAULT '{"cart": {}}'::jsonb
+  `create index idx_users_email on shop.t_users(email);`,
+
+  ` CREATE TABLE shop.t_cart (
+    id SERIAL PRIMARY KEY,
+    foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE,
+    foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE,
+    cartName varchar(60) NOT NULL,
+    quantity INT NOT NULL,
+    oldPrice Decimal(6, 2) NOT NULL,
+    newPrice Decimal(6, 2) NOT NULL,
+    discount Decimal(6, 2) DEFAULT 0.0,
+    selectedProperties jsonb DEFAULT '{}'::jsonb NOT NULL,
+    shippingDetails jsonb DEFAULT '{}'::jsonb NOT NULL
     );`,
-  // `create index idx_users_email on shop.t_users(email);`,
+
+  `create index idx_foreign_product_id on shop.t_cart(foreign_product_id);`,
+  `create index idx_foreign_user_id on shop.t_cart(foreign_user_id);`,
+  `create index idx_cartName on shop.t_cart(cartName);`,
 
 ];
 
