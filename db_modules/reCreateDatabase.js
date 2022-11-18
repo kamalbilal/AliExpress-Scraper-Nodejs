@@ -135,7 +135,8 @@ const queries = [
   ` CREATE TABLE shop.t_users (
       id SERIAL PRIMARY KEY,
       email character varying(100) unique,
-      password varchar(75)
+      password varchar(75),
+      cartCount INT DEFAULT 0
       );`,
   // data jsonb DEFAULT '{"cart": {}}'::jsonb
   `create index idx_users_email on shop.t_users(email);`,
@@ -146,8 +147,8 @@ const queries = [
     foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE,
     cartName varchar(60) NOT NULL,
     quantity INT NOT NULL,
-    oldPrice Decimal(6, 2) NOT NULL,
-    newPrice Decimal(6, 2) NOT NULL,
+    price Decimal(6, 2) NOT NULL,
+    shippingPrice Decimal(6, 2) NOT NULL,
     discount Decimal(6, 2) DEFAULT 0.0,
     selectedProperties jsonb DEFAULT '{}'::jsonb NOT NULL,
     shippingDetails jsonb DEFAULT '{}'::jsonb NOT NULL
