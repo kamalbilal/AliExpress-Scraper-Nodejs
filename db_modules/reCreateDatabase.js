@@ -7,19 +7,22 @@ const queries = [
 
   `CREATE TABLE shop.t_productid (
     id SERIAL PRIMARY KEY,
-    productId BigInt unique
+    productId BigInt unique NOT NULL,
+    myProductId BigInt unique NOT NULL
   );`,
+  `create index idx_productId on shop.t_productid(productId);`,
+  `create index idx_myProductId on shop.t_productid(myProductId);`,
 
   ` CREATE TABLE shop.t_titles (
     id SERIAL PRIMARY KEY,
     title VARCHAR(150),
-    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE
+    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
   );`,
   `create index idx_title_foreign_id on shop.t_titles(foreign_id);`,
 
   ` CREATE TABLE shop.t_pricelist (
     id SERIAL PRIMARY KEY,
-    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE,
+    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
     byName jsonb[],
     byNumber jsonb[],
     byData jsonb[],
@@ -30,7 +33,7 @@ const queries = [
 
   ` CREATE TABLE shop.t_specs (
     id SERIAL PRIMARY KEY,
-    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE,
+    foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
     specs jsonb[]
   );`,
   `create index idx_specs_foreign_id on shop.t_specs(foreign_id);`,
@@ -52,7 +55,7 @@ const queries = [
     oneStar INT DEFAULT 0,
     oneStarPercentage Decimal(6, 2) DEFAULT 0.0,
     totalReviews Int DEFAULT 0,
-    foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+    foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
   );`,
   `create index idx_product_ratings_foreign_id on shop.t_product_ratings(foreign_id);`,
 
@@ -71,14 +74,14 @@ const queries = [
     storeUrl VARCHAR(150),
     isSellerLocal Boolean DEFAULT false,
     isSellerTopRated Boolean DEFAULT false,
-    foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+    foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
   );`,
   `create index idx_storeinfo_foreign_id on shop.t_storeinfo(foreign_id);`,
 
   `CREATE TABLE shop.t_shippingdetails (
     	id SERIAL PRIMARY KEY,
     	shipping jsonb[],
-    	foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+    	foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_shippingdetails_foreign_id on shop.t_shippingdetails(foreign_id);`,
 
@@ -86,7 +89,7 @@ const queries = [
       id SERIAL PRIMARY KEY,
       description TEXT,
       isModified Boolean Default false,
-      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
 
   `create index idx_modifieddescription_isModified on shop.t_modifieddescription(isModified);`,
@@ -114,21 +117,21 @@ const queries = [
       totalProductSoldCountUnit VARCHAR(15),
       totalProductWishedCount INT,
       comingSoon Boolean DEFAULT false,
-      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_basicInfo_foreign_id on shop.t_basicInfo(foreign_id);`,
 
   ` CREATE TABLE shop.t_mainImages (
       id SERIAL PRIMARY KEY,
       image_link_Array jsonb[],
-      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_mainImages_foreign_id on shop.t_mainImages(foreign_id);`,
 
   ` CREATE TABLE shop.t_properties (
       id SERIAL PRIMARY KEY,
       property_array jsonb[],
-      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE
+      foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_properties_foreign_id on shop.t_properties(foreign_id);`,
 
@@ -141,11 +144,12 @@ const queries = [
   // data jsonb DEFAULT '{"cart": {}}'::jsonb
   `create index idx_users_email on shop.t_users(email);`,
 
-  ` CREATE TABLE shop.t_cart (
+  `CREATE TABLE shop.t_cart (
     id SERIAL PRIMARY KEY,
-    foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE,
-    foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE,
+    foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
+    foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
     cartName varchar(60) NOT NULL,
+    selectedImageUrl varchar(250) NOT NULL,
     quantity INT NOT NULL,
     price Decimal(6, 2) NOT NULL,
     shippingPrice Decimal(6, 2) NOT NULL,
@@ -157,6 +161,26 @@ const queries = [
   `create index idx_foreign_product_id on shop.t_cart(foreign_product_id);`,
   `create index idx_foreign_user_id on shop.t_cart(foreign_user_id);`,
   `create index idx_cartName on shop.t_cart(cartName);`,
+
+  `CREATE TABLE shop.t_wishList (
+    id SERIAL PRIMARY KEY,
+    foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
+    wishListName varchar(60) DEFAULT 'default' UNIQUE
+    );`,
+
+  `create index idx_t_wishList_foreign_user_id on shop.t_wishList(foreign_user_id);`,
+  `create index idx_wishListName on shop.t_wishList(wishListName);`,
+
+  `CREATE TABLE shop.t_wishList_products (
+    id SERIAL PRIMARY KEY,
+    foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
+    foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
+    foreign_wishList_id INT REFERENCES shop.t_wishList(id) ON DELETE CASCADE NOT NULL
+    );`,
+
+  `create index idx_t_wishList_products_foreign_user_id on shop.t_wishList_products(foreign_user_id);`,
+  `create index idx_t_wishList_products_foreign_product_id on shop.t_wishList_products(foreign_product_id);`,
+  `create index idx_t_wishList_products_foreign_wishList_id on shop.t_wishList_products(foreign_wishList_id);`,
 
 ];
 

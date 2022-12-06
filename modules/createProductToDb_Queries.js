@@ -307,15 +307,25 @@ async function creatingPropertyQueries(id, sizesColors) {
   return temp;
 }
 
+function reverse(s){
+  return s.split("").reverse().join("");
+}
+
+
 async function getId_From_t_ProductId(productId, connection) {
   if (!productId) return { status: false, reason: "Enter ProductId" };
   let id = await db.query(`SELECT id FROM shop.t_productid WHERE productid = ${productId}`, connection);
+  
+  const stringProductId = String(productId)
+  const total = parseInt(stringProductId.length/2)
+  const myProductId = stringProductId.slice(total) + reverse(stringProductId.slice(0, total))
+  console.log({productId, myProductId});
   if (id["rows"].length === 0) {
-    id = await db.query(`INSERT INTO shop.t_productid(productid) Values(${productId}) RETURNING id`, connection);
+    id = await db.query(`INSERT INTO shop.t_productid(productid, myProductId) Values(${productId}, ${myProductId}) RETURNING id`, connection);
     // id = await query(`SELECT id FROM shop.t_productid WHERE productid = ${productId}`);
   } else {
     await db.query(`DELETE FROM shop.t_productid WHERE productid = ${productId}`, connection);
-    id = await db.query(`INSERT INTO shop.t_productid(productid) Values(${productId}) RETURNING id;`, connection);
+    id = await db.query(`INSERT INTO shop.t_productid(productid, myProductId) Values(${productId}, ${myProductId}) RETURNING id;`, connection);
     // id = await query(`SELECT id FROM shop.t_productid WHERE productid = ${productId}`);
   }
   return { status: true, id: id["rows"][0]["id"] };
