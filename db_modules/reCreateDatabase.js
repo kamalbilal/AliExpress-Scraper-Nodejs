@@ -165,8 +165,8 @@ const queries = [
   `CREATE TABLE shop.t_wishList (
     id SERIAL PRIMARY KEY,
     foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
-    wishListName varchar(60) UNIQUE,
-    selectedImageUrl varchar(250) NOT NULL
+    wishListName varchar(60) NOT NULL,
+    UNIQUE(foreign_user_id, wishListName)
     );`,
 
   `create index idx_t_wishList_foreign_user_id on shop.t_wishList(foreign_user_id);`,
@@ -176,7 +176,8 @@ const queries = [
     id SERIAL PRIMARY KEY,
     foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
     foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
-    foreign_wishList_id INT REFERENCES shop.t_wishList(id) ON DELETE CASCADE NOT NULL
+    foreign_wishList_id INT REFERENCES shop.t_wishList(id) ON DELETE CASCADE NOT NULL,
+    selectedImageUrl varchar(250) NOT NULL
     );`,
 
   `create index idx_t_wishList_products_foreign_user_id on shop.t_wishList_products(foreign_user_id);`,
