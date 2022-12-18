@@ -12,6 +12,19 @@ const cookie = {
   aep_usuc_f: "site=glo&c_tp=USD&region=US&b_locale=en_US",
 };
 
+function cookieConverter(cookieObject) {
+  const temp = []
+  Object.keys(cookieObject).map((el) => temp.push({
+    name: el,
+    value: cookieObject[el],
+    domain: "aliexpress.com"
+  }))
+  console.log(temp);
+  return temp
+}
+
+cookieConverter(cookie)
+
 const newCookie = [
   {
     name: "aep_usuc_f",
@@ -154,4 +167,4 @@ async function scrape() {
   console.timeEnd("test");
 }
 
-scrape();
+// scrape();
