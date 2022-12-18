@@ -43,8 +43,8 @@ async function creatingPriceListQueries(id, priceList) {
       insertIntoColumns: ["foreign_id", "byName", "byNumber", "byData", "country"],
       values: [
         id,
-        `ARRAY [${priceList.InNames.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`,
-        `ARRAY [${priceList.InNumbers.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`,
+        priceList.InNames ? `ARRAY [${priceList.InNames.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
+        priceList.InNumbers ? `ARRAY [${priceList.InNumbers.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
         `ARRAY [${priceList.Data.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`,
         `$$${priceList.country}$$`,
       ],
@@ -301,7 +301,7 @@ async function creatingPropertyQueries(id, sizesColors) {
       method: "INSERT",
       tableName: "shop.t_properties",
       insertIntoColumns: ["foreign_id", "property_array"],
-      values: [id, `ARRAY [${sizesColors.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`],
+      values: [id, sizesColors ? `ARRAY [${sizesColors.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null"],
     },
   });
   return temp;

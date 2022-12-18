@@ -18,6 +18,7 @@
     "node-fetch": "^3.2.10",
     "pg": "^8.8.0",
     "prompt-sync": "^4.2.0",
+    "puppeteer": "^19.4.1",
     "rimraf": "^3.0.2"
   }
 }

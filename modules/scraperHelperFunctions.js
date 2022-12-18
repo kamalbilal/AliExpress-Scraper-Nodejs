@@ -13,6 +13,7 @@ function formatAllPrices(json, countryCode = "", showShipFromInFinalData = false
     getOnlyForCountry = countryCode;
   }
 
+  console.log(json);
   for (let index = 0; index < json["sizesColors"].length; index++) {
     arrayInNumbers[index] = [];
     arrayInNames[index] = [];

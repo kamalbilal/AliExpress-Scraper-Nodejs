@@ -3,9 +3,9 @@ const he = require("he");
 const fs = require("fs");
 
 async function oldScraper(data, link, old_productId) {
-  // fs.writeFileSync(`output/real_data/${old_productId}.json`, JSON.stringify(data))
+  fs.writeFileSync(`output/real_data/${old_productId}.json`, JSON.stringify(data));
   if (!data.hasOwnProperty("titleModule")) {
-    return false
+    return false;
   }
   const title = he.decode(data["titleModule"]["subject"].replaceAll("'", "''"));
   const description_Link = data["descriptionModule"]["descriptionUrl"];
@@ -62,11 +62,16 @@ async function oldScraper(data, link, old_productId) {
   const quantityAvaliable = data["quantityModule"]["totalAvailQuantity"];
 
   const sizesColors = data["skuModule"]["productSKUPropertyList"];
-  const priceList = formatPricesMain({ sizesColors: sizesColors, priceList: data["skuModule"]["skuPriceList"] }, false, "US", "CN");
+  let priceList;
+  if (sizesColors) {
+    priceList = formatPricesMain({ sizesColors: sizesColors, priceList: data["skuModule"]["skuPriceList"] }, false, "US", "CN");
+  } else {
+    priceList = { _info: "All are synced by their indexes ==> Meaning ===> InNames[0] == InNumbers[0] == Data[0]", country: "US / CN", InNames: null, InNumbers: null, Data: data["skuModule"]["skuPriceList"] };
+  }
 
   let specs;
   if (data["specsModule"].hasOwnProperty("props")) {
-    specs = data["specsModule"]["props"].map(el => ({attrName: el.attrName.replaceAll("'", "''") ,attrValue: el.attrValue.replaceAll("'", "''")}));
+    specs = data["specsModule"]["props"].map((el) => ({ attrName: el.attrName.replaceAll("'", "''"), attrValue: el.attrValue.replaceAll("'", "''") }));
   } else {
     specs = null;
   }
@@ -157,7 +162,7 @@ async function oldScraper(data, link, old_productId) {
     totalProductSoldCount: totalProductSoldCount,
     totalProductWishedCount: totalProductWishedCount,
     totalProductSoldCountUnit: totalProductSoldCountUnit,
-    storeInfo: {...storeInfo, storeName: storeInfo.storeName.replaceAll("'", "''")},
+    storeInfo: { ...storeInfo, storeName: storeInfo.storeName.replaceAll("'", "''") },
     isSellerLocal: isSellerLocal,
 
     shipping: shipping,

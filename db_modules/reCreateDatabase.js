@@ -155,7 +155,8 @@ const queries = [
     shippingPrice Decimal(6, 2) NOT NULL,
     discount Decimal(6, 2) DEFAULT 0.0,
     selectedProperties jsonb DEFAULT '{}'::jsonb NOT NULL,
-    shippingDetails jsonb DEFAULT '{}'::jsonb NOT NULL
+    shippingDetails jsonb DEFAULT '{}'::jsonb NOT NULL,
+    UNIQUE(foreign_user_id, cartName)
     );`,
 
   `create index idx_foreign_product_id on shop.t_cart(foreign_product_id);`,

@@ -77,8 +77,8 @@ const productDataRequest = (productId, isRejectedOnce) => {
         // when ip banned coonect vpn ==> end
 
         
+        await fs.writeFileSync(`${productId}.txt`, text);
         const { runParams, _dida_config_ } = new JSDOM(text, { runScripts: "dangerously" }).window;
-        // await fs.writeFileSync(`${productId}.txt`, JSON.stringify(runParams));
 
         if (Object.keys(runParams).length !== 0) {
           if (!runParams["data"].hasOwnProperty("priceModule")) {
