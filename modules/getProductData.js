@@ -133,7 +133,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
             }
           }
         } else {
-          finalShippingData = shippingDataList[0];
+          finalShippingData = shippingDataList[0].map((el) => ({"bizData" : el}));
         }
 
         if (runParams) {

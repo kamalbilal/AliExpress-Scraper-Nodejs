@@ -9,8 +9,10 @@ const transformData = (promise) => {
       if (promise["status"] === "fulfilled") {
         let I_Need;
         if (promise["value"]["scraperUsed"] === "old") {
+          
           I_Need = await oldScraper(promise["value"]["data"]["data"], promise["value"]["link"], promise["value"]["old_productId"]);
         } else if (promise["value"]["scraperUsed"] === "new") {
+
           I_Need = await newScraper(promise["value"]["data"]["data"], promise["value"]["link"], promise["value"]["old_productId"]);
         }
 
