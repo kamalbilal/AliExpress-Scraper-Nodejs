@@ -13,15 +13,15 @@ function cookieConverter(cookieObject) {
   Object.keys(cookieObject).map((el) =>
     temp.push(
       {
-      name: el,
-      value: cookieObject[el],
-      domain: "www.aliexpress.com",
-    },
+        name: el,
+        value: cookieObject[el],
+        domain: "www.aliexpress.com",
+      },
       {
-      name: el,
-      value: cookieObject[el],
-      domain: "www.aliexpress.us",
-    },
+        name: el,
+        value: cookieObject[el],
+        domain: "www.aliexpress.us",
+      }
     )
   );
   return temp;
@@ -85,7 +85,6 @@ const productDataRequest = (productId, isRejectedOnce) => {
         let _dida_config_;
         try {
           runParams = await page.evaluate(() => runParams);
-          runParams["shippingData"] = finalShippingData 
         } catch {
           runParams = null;
         }
@@ -93,8 +92,6 @@ const productDataRequest = (productId, isRejectedOnce) => {
         if (!runParams) {
           try {
             _dida_config_ = await page.evaluate(() => _dida_config_);
-            _dida_config_ = _dida_config_._init_data_["shippingData"] = finalShippingData ;
-
           } catch {
             _dida_config_ = null;
           }
@@ -121,7 +118,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
             const element = firstArray[index];
             const firstDeliveryProviderName = element["deliveryProviderName"];
             if (element["shippingFee"] === "free") {
-              finalShippingData.push({ ...element, perItemPrice: 0 });
+              finalShippingData.push({ bizData: { ...element, perItemPrice: 0 } });
             } else {
               for (let index2 = 0; index2 < secondArray.length; index2++) {
                 const element2 = secondArray[index2];
@@ -129,7 +126,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
                 if (firstDeliveryProviderName === secondDeliveryProviderName) {
                   let perItemPrice = parseFloat(element2["displayAmount"] || 0) - parseFloat(element["displayAmount"] || 0);
                   perItemPrice = perItemPrice === 0 ? 0 : parseFloat((perItemPrice + 0.5).toFixed(2));
-                  finalShippingData.push({ ...element, perItemPrice });
+                  finalShippingData.push({"bizData":{ ...element, perItemPrice }});
                   break;
                 }
               }
@@ -137,6 +134,12 @@ const productDataRequest = (productId, isRejectedOnce) => {
           }
         } else {
           finalShippingData = shippingDataList[0];
+        }
+
+        if (runParams) {
+          runParams["data"]["shippingData"] = finalShippingData
+        } else if(_dida_config_) {
+          _dida_config_ = _dida_config_._init_data_["data"]["shippingData"] = finalShippingData;
         }
 
         let vpnConnecting = JSON.parse(fs.readFileSync("variables/vpnSettings.json", "utf8"));
