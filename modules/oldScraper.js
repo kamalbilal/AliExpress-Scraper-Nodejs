@@ -85,7 +85,8 @@ async function oldScraper(data, link, old_productId) {
     delete storeInfo["i18nMap"];
   }
 
-  const shipping = shippingDataSorter(data["shippingModule"]);
+  // const shipping = shippingDataSorter(data["shippingModule"]);
+  const shipping = shippingDataSorter(data["shippingData"]);
 
   const relatedCategoryNumber = [];
   relatedCategoryNumber.push(String(categoryId));

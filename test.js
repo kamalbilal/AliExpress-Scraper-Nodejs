@@ -13,17 +13,16 @@ const cookie = {
 };
 
 function cookieConverter(cookieObject) {
-  const temp = []
-  Object.keys(cookieObject).map((el) => temp.push({
-    name: el,
-    value: cookieObject[el],
-    domain: "aliexpress.com"
-  }))
-  console.log(temp);
-  return temp
+  const temp = [];
+  Object.keys(cookieObject).map((el) =>
+    temp.push({
+      name: el,
+      value: cookieObject[el],
+      domain: "aliexpress.com",
+    })
+  );
+  return temp;
 }
-
-cookieConverter(cookie)
 
 const newCookie = [
   {
@@ -80,7 +79,7 @@ async function scrape() {
   const browser = await puppeteer.launch({ headless: true });
 
   const page = await browser.newPage();
-  await page.setCookie(...newCookie);
+  await page.setCookie(...cookieConverter(cookie));
 
   console.time("test");
 
@@ -130,12 +129,13 @@ async function scrape() {
       _dida_config_ = null;
     }
   }
-
+  const cookies = {}
+  const pageCookie = await page.cookies()
+  pageCookie.map((el) => {
+    cookies[el.name] = el.value;
+  });
+  console.log(cookies);
   await browser.close();
-
-  // if (shippingDataList) {
-
-  // }
 
   if (shippingDataList.length === 2) {
     const firstArray = shippingDataList[0];
@@ -145,26 +145,25 @@ async function scrape() {
       const element = firstArray[index];
       const firstDeliveryProviderName = element["deliveryProviderName"];
       if (element["shippingFee"] === "free") {
-        finalShippingData.push({...element, perItemPrice : 0});
+        finalShippingData.push({ ...element, perItemPrice: 0 });
       } else {
         for (let index2 = 0; index2 < secondArray.length; index2++) {
           const element2 = secondArray[index2];
           const secondDeliveryProviderName = element2["deliveryProviderName"];
           if (firstDeliveryProviderName === secondDeliveryProviderName) {
-            let perItemPrice = parseFloat(element2["displayAmount"] || 0) - parseFloat(element["displayAmount"] || 0)
-            perItemPrice = perItemPrice === 0 ? 0 : parseFloat((perItemPrice + 0.5).toFixed(2))
-            finalShippingData.push({...element, perItemPrice});
-            break
+            let perItemPrice = parseFloat(element2["displayAmount"] || 0) - parseFloat(element["displayAmount"] || 0);
+            perItemPrice = perItemPrice === 0 ? 0 : parseFloat((perItemPrice + 0.5).toFixed(2));
+            finalShippingData.push({ ...element, perItemPrice });
+            break;
           }
         }
       }
     }
   }
 
-  console.log(JSON.stringify(finalShippingData));
-
+  // console.log(JSON.stringify(finalShippingData));
 
   console.timeEnd("test");
 }
 
-// scrape();
+scrape();

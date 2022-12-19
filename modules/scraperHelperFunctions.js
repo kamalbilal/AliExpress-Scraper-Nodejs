@@ -187,7 +187,8 @@ function formatPricesMain(json, showShipFromInFinalData = false, country1 = "", 
 }
 
 function shippingDataSorter(shippingData) {
-  const shippingArray = shippingData["generalFreightInfo"]["originalLayoutResultList"];
+  // const shippingArray = shippingData["generalFreightInfo"]["originalLayoutResultList"];
+  const shippingArray = shippingData
   const shippingFinalData = {};
   const tempData = [];
   for (let index = 0; index < shippingArray.length; index++) {
