@@ -36,6 +36,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
     let retryCount = 0;
     let scraperUsed = "old";
     let displayWaitingLog = true;
+    let page;
     console.log("Getting productId = " + chalk.greenBright(productId) + " : Total failures = " + chalk.redBright(failedCount));
     while (runLoop) {
       try {
@@ -47,12 +48,12 @@ const productDataRequest = (productId, isRejectedOnce) => {
 
         // const browser = await puppeteer.launch({ headless: true });
 
-        const page = await browser.newPage();
+        page = await browser.newPage();
         await page.setCookie(...cookieConverter(defaultCookies));
 
         await page.goto(link, {
           timeout: 0,
-          waitUntil: "domcontentloaded",
+          waitUntil: "load",
         });
 
         const promise1 = new Promise(async (resolve, reject) => {
@@ -89,7 +90,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
 
         if (element == null || element === "customs-message-wrap") {
           await page.close();
-          reject("Sorry, this item is no longer available!");
+          reject({ text: "Sorry, this item is no longer available!", productId: productId });
           return;
         }
 
@@ -101,6 +102,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
         await page.$eval(".comet-modal-wrap", (element) => element.click());
 
         const data = (await response.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
+
         shippingDataList.push(data);
 
         await page.waitForSelector(".next-after .next-btn.next-medium.next-btn-normal");
@@ -111,9 +113,13 @@ const productDataRequest = (productId, isRejectedOnce) => {
             element.click();
           });
 
+          await page.waitForSelector(".dynamic-shipping", {
+            timeout: 5000,
+          });
           await page.$eval(".dynamic-shipping", (element) => element.click());
 
           const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
+
           const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
           shippingDataList.push(data2);
         }
@@ -210,7 +216,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
         if (Object.keys(runParams).length !== 0) {
           if (!runParams["data"].hasOwnProperty("priceModule")) {
             fs.writeFileSync(`output/rejected/${productId}.txt`, `Reason ==> Page Not Found`);
-            reject("Page Not Found");
+            reject({ text: "Page Not Found", productId });
             return;
           }
 
@@ -222,7 +228,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
             console.log({ [productId]: "Currency is not in USD" });
             // await fs.writeFileSync(`output/rejected/${productId}.txt`, JSON.stringify(runParams));
             await fs.writeFileSync(`output/rejected/${productId}.txt`, `Reason ==> Currency is not in USD`);
-            return reject("Currency is not in USD");
+            return reject({ text: "Currency is not in USD", productId });
           }
 
           resolve({ data: runParams, scraperUsed, link, old_productId: productId });
@@ -233,12 +239,13 @@ const productDataRequest = (productId, isRejectedOnce) => {
         } else {
           scraperUsed = "Unknown";
           await fs.writeFileSync(`output/rejected/${productId}.txt`, `Reason ==> Scarper Unknown`);
-          reject("Scraper unknown");
+          reject({ text: "Scraper unknown", productId });
         }
 
         runLoop = false;
         // defaultCookies = { ...defaultCookies, ...cookies };
       } catch (e) {
+        page.close();
         console.log(e);
         if (retryCount < 4) {
           console.log("Retrying ==> getting productId = " + productId);

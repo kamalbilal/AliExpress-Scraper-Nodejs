@@ -1,4 +1,5 @@
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
+const { webkit } = require('playwright');
 
 const cookie = {
   ali_apache_id: "33.3.37.90.1671376950447.187211.9",
@@ -76,7 +77,7 @@ async function scrape() {
   const shippingDataList = [];
   let finalShippingData = [];
 
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await webkit.launch({ headless: false });
 
   const page = await browser.newPage();
   await page.setCookie(...cookieConverter(cookie));
@@ -85,14 +86,12 @@ async function scrape() {
 
   await page.goto("https://www.aliexpress.com/item/3256802974172628.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US", {
     timeout: 0,
-    waitUntil: "domcontentloaded",
+    waitUntil: "load",
   });
-  // await page.waitForSelector(".dynamic-shipping", {
-  //   timeout: 0,
-  // });
+ 
   const promise1 = new Promise(async (resolve, reject) => {
     await page
-      .waitForSelector(".dynamic-shippings", {
+      .waitForSelector(".dynamic-shipping", {
         timeout: 5000,
       })
       .catch(() => reject(false));
@@ -122,7 +121,6 @@ async function scrape() {
     }
   }
   if (element === "customs-message-wrap") {
-    
   }
 
   await page.$eval(".dynamic-shipping", (element) => element.click());
@@ -143,6 +141,9 @@ async function scrape() {
       element.click();
     });
 
+    await page.waitForSelector(".dynamic-shipping", {
+      timeout: 5000,
+    });
     await page.click(".dynamic-shipping", { delay: 1000 });
     const response2 = await page.waitForResponse((response) => response.url().startsWith("https://acs.aliexpress.us/h5/mtop.global.expression.dynamic.component.queryoptionforitem"));
     const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
