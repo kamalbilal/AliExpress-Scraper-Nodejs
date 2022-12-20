@@ -49,16 +49,23 @@ const productDataRequest = (productId, isRejectedOnce) => {
         // const browser = await puppeteer.launch({ headless: true });
 
         page = await browser.newPage();
+        await page.setRequestInterception(true);
+
+        //if the page makes a  request to a resource type of image or stylesheet then abort that            request
+        page.on("request", (request) => {
+          if (request.resourceType() === "image" || request.resourceType() === "stylesheet") request.abort();
+          else request.continue();
+        });
         await page.setCookie(...cookieConverter(defaultCookies));
 
         await page.goto(link, {
           timeout: 0,
-          waitUntil: "load",
+          waitUntil: "domcontentloaded",
         });
 
         const promise1 = new Promise(async (resolve, reject) => {
           await page
-            .waitForSelector(".dynamic-shipping", {
+            .waitForSelector(".product-dynamic-shipping button", {
               timeout: 5000,
             })
             .catch(() => reject(false));
@@ -94,7 +101,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
           return;
         }
 
-        await page.$eval(".dynamic-shipping", (element) => element.click());
+        await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
         const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
 
@@ -113,10 +120,10 @@ const productDataRequest = (productId, isRejectedOnce) => {
             element.click();
           });
 
-          await page.waitForSelector(".dynamic-shipping", {
+          await page.waitForSelector(".product-dynamic-shipping button", {
             timeout: 5000,
           });
-          await page.$eval(".dynamic-shipping", (element) => element.click());
+          await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
           const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
 

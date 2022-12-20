@@ -10,7 +10,7 @@ async function resetVariables() {
 }
 
 async function startScraper() {
-    global.browser = await puppeteer.launch({ headless: true, args: ['--gpu'] });
+    global.browser = await puppeteer.launch({ headless: false});
     console.log("Booting Scraper....");
     resetVariables()
     const data = await fetch("https://www.aliexpress.com", {

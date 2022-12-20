@@ -92,14 +92,14 @@ async function scrape() {
 
   console.time("test");
 
-  await page.goto("https://www.aliexpress.com/item/3256802974172628.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US", {
+  await page.goto("https://www.aliexpress.com/item/3256804777487096.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US", {
     timeout: 0,
-    waitUntil: "load",
+    waitUntil: "domcontentloaded",
   });
  
   const promise1 = new Promise(async (resolve, reject) => {
     await page
-      .waitForSelector(".dynamic-shipping", {
+      .waitForSelector(".product-dynamic-shipping button", {
         timeout: 5000,
       })
       .catch(() => reject(false));
@@ -131,7 +131,7 @@ async function scrape() {
   if (element === "customs-message-wrap") {
   }
 
-  await page.$eval(".dynamic-shipping", (element) => element.click());
+  await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
   const response = await page.waitForResponse((response) => response.url().startsWith("https://acs.aliexpress.us/h5/mtop.global.expression.dynamic.component.queryoptionforitem"));
 
@@ -149,10 +149,10 @@ async function scrape() {
       element.click();
     });
 
-    await page.waitForSelector(".dynamic-shipping", {
+    await page.waitForSelector(".product-dynamic-shipping button", {
       timeout: 5000,
     });
-    await page.click(".dynamic-shipping", { delay: 1000 });
+    await page.click(".product-dynamic-shipping button");
     const response2 = await page.waitForResponse((response) => response.url().startsWith("https://acs.aliexpress.us/h5/mtop.global.expression.dynamic.component.queryoptionforitem"));
     const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
     shippingDataList.push(data2);
@@ -179,7 +179,7 @@ async function scrape() {
     cookies[el.name] = el.value;
   });
   console.log(cookies);
-  await browser.close();
+  // await browser.close();
 
   if (shippingDataList.length === 2) {
     const firstArray = shippingDataList[0];
