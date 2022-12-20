@@ -76,20 +76,55 @@ async function scrape() {
   const shippingDataList = [];
   let finalShippingData = [];
 
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({ headless: false });
 
   const page = await browser.newPage();
   await page.setCookie(...cookieConverter(cookie));
 
   console.time("test");
 
-  await page.goto("https://www.aliexpress.com/item/3256804796226753.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US", {
+  await page.goto("https://www.aliexpress.com/item/3256802974172628.html?gatewayAdapt=glo2usa4itemAdapt&_randl_shipto=US", {
     timeout: 0,
     waitUntil: "domcontentloaded",
   });
-  await page.waitForSelector(".dynamic-shipping", {
-    timeout: 0,
+  // await page.waitForSelector(".dynamic-shipping", {
+  //   timeout: 0,
+  // });
+  const promise1 = new Promise(async (resolve, reject) => {
+    await page
+      .waitForSelector(".dynamic-shippings", {
+        timeout: 5000,
+      })
+      .catch(() => reject(false));
+    resolve("dynamic-shiping");
   });
+
+  const promise2 = new Promise(async (resolve, reject) => {
+    await page
+      .waitForSelector(".customs-message-wrap", {
+        timeout: 5000,
+      })
+      .catch(() => reject(false));
+    resolve("customs-message-wrap");
+  });
+
+  let element;
+  for (let index = 0; index < 2; index++) {
+    try {
+      element = await Promise.race([promise1, promise2]);
+      if (element) {
+        break;
+      }
+    } catch {
+      if (index == 1) {
+        element = null;
+      }
+    }
+  }
+  if (element === "customs-message-wrap") {
+    
+  }
+
   await page.$eval(".dynamic-shipping", (element) => element.click());
 
   const response = await page.waitForResponse((response) => response.url().startsWith("https://acs.aliexpress.us/h5/mtop.global.expression.dynamic.component.queryoptionforitem"));
@@ -129,8 +164,8 @@ async function scrape() {
       _dida_config_ = null;
     }
   }
-  const cookies = {}
-  const pageCookie = await page.cookies()
+  const cookies = {};
+  const pageCookie = await page.cookies();
   pageCookie.map((el) => {
     cookies[el.name] = el.value;
   });

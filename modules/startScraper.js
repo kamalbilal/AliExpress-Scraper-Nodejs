@@ -1,6 +1,7 @@
 const cookieCreaterFromString = require("./cookieCreaterFromString");
 const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
-const fs = require("fs")
+const fs = require("fs");
+const puppeteer = require("puppeteer");
 
 async function resetVariables() {
   let vpnSettings =  fs.readFileSync("variables/vpnSettings.json", "utf8")
@@ -9,6 +10,7 @@ async function resetVariables() {
 }
 
 async function startScraper() {
+    global.browser = await puppeteer.launch({ headless: false });
     console.log("Booting Scraper....");
     resetVariables()
     const data = await fetch("https://www.aliexpress.com", {

@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "9efac34b-fef7-4da1-8f25-b51dadf98409",
+    "colId": "history",
+    "containerId": "",
+    "name": "https://dashback.bling-test.xyz/platform/extend/newMessage/count",
+    "url": "https://dashback.bling-test.xyz/platform/extend/newMessage/count",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2022-12-20T08:11:00.037Z",
+    "modified": "2022-12-20T08:13:52.562Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "clientId",
+          "value": "1"
+        }
+      ]
+    },
+    "tests": []
+  },
+  {
+    "_id": "879b586a-3cb5-4ef8-bc8c-2fd9ca91c95d",
+    "colId": "history",
+    "containerId": "",
+    "name": "https://dashback.bling-test.xyz/platform/extend/client",
+    "url": "https://dashback.bling-test.xyz/platform/extend/client",
+    "method": "GET",
+    "sortNum": 0,
+    "created": "2022-12-20T08:15:02.542Z",
+    "modified": "2022-12-20T08:15:29.737Z",
+    "headers": [],
+    "params": [],
+    "body": {
+      "type": "formdata",
+      "raw": "",
+      "form": [
+        {
+          "name": "clientId",
+          "value": "1"
+        }
+      ]
+    },
+    "tests": []
+  }
+]

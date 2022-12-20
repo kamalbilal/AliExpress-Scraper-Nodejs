@@ -9,7 +9,7 @@ const fs = require("fs");
 const WriteToFile_WithoutCheckingImages = require("../modules/WriteToFile_WithoutCheckingImages");
 const chalk = require("chalk");
 
-const LIMIT = 10 // get 25 products at a time
+const LIMIT = 8 // get 25 products at a time
 
 function Glob(query) {
   return new Promise((resolve, reject) => {
@@ -26,6 +26,7 @@ async function getAllProductsData() {
 async function getAllProductsDataFromArray(productIdArray, isRejectedOnce = true) {
   await startScraper();
   await mainFromArray(productIdArray, isRejectedOnce);
+  
 }
 
 async function getList() {
@@ -92,6 +93,9 @@ async function mainFromArray(productIdArray, isRejectedOnce) {
     }
   }
   // main code end
+  if (browser) {
+    await browser.close()
+  }
     return
 }
 async function main() {
@@ -143,7 +147,10 @@ async function mainSingleProduct(productId) {
     WriteToFile_WithoutCheckingImages(I_Need_Array);
   }
   // await fs.writeFileSync("variables/lastSearchedProductData.json", JSON.stringify({ ...lastSeachedProducts, [filename]: productsArray[productsArray.length - 1] }));
-
+  
+  if (browser) {
+    await browser.close()
+  }
   console.log("\nCompleted\n");
 }
 

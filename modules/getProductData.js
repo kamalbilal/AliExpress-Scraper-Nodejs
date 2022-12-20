@@ -1,5 +1,5 @@
 // const { JSDOM } = require("jsdom");
-const puppeteer = require("puppeteer");
+// const puppeteer = require("puppeteer");
 const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
 const fs = require("fs");
 const convertJsonCookieToString = require("./convertJsonCookieToString");
@@ -45,7 +45,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
         const shippingDataList = [];
         let finalShippingData = [];
 
-        const browser = await puppeteer.launch({ headless: true });
+        // const browser = await puppeteer.launch({ headless: true });
 
         const page = await browser.newPage();
         await page.setCookie(...cookieConverter(defaultCookies));
@@ -54,9 +54,45 @@ const productDataRequest = (productId, isRejectedOnce) => {
           timeout: 0,
           waitUntil: "domcontentloaded",
         });
-        await page.waitForSelector(".dynamic-shipping", {
-          timeout: 0,
+
+        const promise1 = new Promise(async (resolve, reject) => {
+          await page
+            .waitForSelector(".dynamic-shipping", {
+              timeout: 5000,
+            })
+            .catch(() => reject(false));
+          resolve("dynamic-shiping");
         });
+
+        const promise2 = new Promise(async (resolve, reject) => {
+          await page
+            .waitForSelector(".customs-message-wrap", {
+              timeout: 5000,
+            })
+            .catch(() => reject(false));
+          resolve("customs-message-wrap");
+        });
+
+        let element;
+        for (let index = 0; index < 2; index++) {
+          try {
+            element = await Promise.race([promise1, promise2]);
+            if (element) {
+              break;
+            }
+          } catch {
+            if (index == 1) {
+              element = null;
+            }
+          }
+        }
+
+        if (element == null || element === "customs-message-wrap") {
+          await page.close();
+          reject("Sorry, this item is no longer available!");
+          return;
+        }
+
         await page.$eval(".dynamic-shipping", (element) => element.click());
 
         const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
@@ -68,14 +104,15 @@ const productDataRequest = (productId, isRejectedOnce) => {
         shippingDataList.push(data);
 
         await page.waitForSelector(".next-after .next-btn.next-medium.next-btn-normal");
-
         const buttonDisabled = await page.$eval(".next-after .next-btn.next-medium.next-btn-normal", (button) => button.hasAttribute("disabled"));
+
         if (buttonDisabled === false) {
           await page.$eval(".next-after .next-btn.next-medium.next-btn-normal", (element) => {
             element.click();
           });
 
-          await page.click(".dynamic-shipping", { delay: 1000 });
+          await page.$eval(".dynamic-shipping", (element) => element.click());
+
           const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
           const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
           shippingDataList.push(data2);
@@ -107,7 +144,8 @@ const productDataRequest = (productId, isRejectedOnce) => {
         // });
         // console.log(cookies);
 
-        await browser.close();
+        await page.close();
+        // await browser.close();
 
         // calculate perItemPrice in shippingData
         if (shippingDataList.length === 2) {
@@ -126,19 +164,19 @@ const productDataRequest = (productId, isRejectedOnce) => {
                 if (firstDeliveryProviderName === secondDeliveryProviderName) {
                   let perItemPrice = parseFloat(element2["displayAmount"] || 0) - parseFloat(element["displayAmount"] || 0);
                   perItemPrice = perItemPrice === 0 ? 0 : parseFloat((perItemPrice + 0.5).toFixed(2));
-                  finalShippingData.push({"bizData":{ ...element, perItemPrice }});
+                  finalShippingData.push({ bizData: { ...element, perItemPrice } });
                   break;
                 }
               }
             }
           }
         } else {
-          finalShippingData = shippingDataList[0].map((el) => ({"bizData" : el}));
+          finalShippingData = shippingDataList[0].map((el) => ({ bizData: el }));
         }
 
         if (runParams) {
-          runParams["data"]["shippingData"] = finalShippingData
-        } else if(_dida_config_) {
+          runParams["data"]["shippingData"] = finalShippingData;
+        } else if (_dida_config_) {
           _dida_config_ = _dida_config_._init_data_["data"]["shippingData"] = finalShippingData;
         }
 

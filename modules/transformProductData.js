@@ -2,6 +2,7 @@ const oldScraper = require("./oldScraper");
 const newScraper = require("./newScraper");
 const descriptionModifier = require("./descriptionModifier")
 const fs = require("fs");
+const handleErrors = require("./handleErrors");
 
 const transformData = (promise) => {
   return new Promise(async (resolve, reject) => {
@@ -24,6 +25,7 @@ const transformData = (promise) => {
         I_Need["modified_description_content"] = await descriptionModifier(I_Need["description_Link"], I_Need["productId"])
         resolve(I_Need);
       } else {
+        handleErrors(promise)
         reject(true)
       }
     } catch (error) {
