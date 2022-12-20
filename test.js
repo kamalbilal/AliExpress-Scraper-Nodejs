@@ -1,5 +1,4 @@
-// const puppeteer = require("puppeteer");
-const { webkit } = require('playwright');
+const puppeteer = require("puppeteer");
 
 const cookie = {
   ali_apache_id: "33.3.37.90.1671376950447.187211.9",
@@ -77,9 +76,18 @@ async function scrape() {
   const shippingDataList = [];
   let finalShippingData = [];
 
-  const browser = await webkit.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: false });
 
   const page = await browser.newPage();
+  await page.setRequestInterception(true);
+
+  //if the page makes a  request to a resource type of image or stylesheet then abort that            request
+  page.on('request', request => {
+      if (request.resourceType() === 'image' || request.resourceType() === 'stylesheet')
+          request.abort();
+      else
+          request.continue();
+  });
   await page.setCookie(...cookieConverter(cookie));
 
   console.time("test");
@@ -197,7 +205,7 @@ async function scrape() {
     }
   }
 
-  // console.log(JSON.stringify(finalShippingData));
+  console.log(JSON.stringify(finalShippingData));
 
   console.timeEnd("test");
 }
