@@ -4,24 +4,39 @@ const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 async function resetVariables() {
-  let vpnSettings =  fs.readFileSync("variables/vpnSettings.json", "utf8")
-  vpnSettings = vpnSettings ? JSON.parse(vpnSettings) : {}
-  fs.writeFileSync("variables/vpnSettings.json", JSON.stringify({...vpnSettings, "isConnecing": false}))
+  let vpnSettings = fs.readFileSync("variables/vpnSettings.json", "utf8");
+  vpnSettings = vpnSettings ? JSON.parse(vpnSettings) : {};
+  fs.writeFileSync("variables/vpnSettings.json", JSON.stringify({ ...vpnSettings, isConnecing: false }));
 }
 
-async function startScraper() {
-    global.browser = await puppeteer.launch({ headless: false});
-    console.log("Booting Scraper....");
-    resetVariables()
-    const data = await fetch("https://www.aliexpress.com", {
-      // redirect: "error",
-
+async function startScraper(launchBrowser = true) {
+  if (launchBrowser) {
+    global.browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process", // <- this one doesn't works in Windows
+        "--disable-gpu",
+      ],
     });
-    defaultCookies = cookieCreaterFromString(data.headers.get("set-cookie"));
-    console.log("Scraper will use these fresh cookies...");
-    console.log(defaultCookies);
-    console.log("Successfully Booted....");
-    console.log("\n");
+    console.log("Booting Scraper with browser....");
+  } else {
+    console.log("Booting Scraper....");
   }
+  resetVariables();
+  const data = await fetch("https://www.aliexpress.com", {
+    // redirect: "error",
+  });
+  defaultCookies = cookieCreaterFromString(data.headers.get("set-cookie"));
+  console.log("Scraper will use these fresh cookies...");
+  console.log(defaultCookies);
+  console.log("Successfully Booted....");
+  console.log("\n");
+}
 
-module.exports = startScraper
+module.exports = startScraper;

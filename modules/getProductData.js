@@ -27,8 +27,19 @@ function cookieConverter(cookieObject) {
   return temp;
 }
 
-const productDataRequest = (productId, isRejectedOnce) => {
+function reverse(s) {
+  return s.split("").reverse().join("");
+}
+
+const elementsExist = () => {
+  const element1 = document.querySelector('.product-dynamic-shipping button');
+  const element2 = document.querySelector('.customs-message-wrap');
+  return element1 !== null || element2 !== null;
+}
+
+const productDataRequest = (productId, isRejectedOnce, i) => {
   return new Promise(async (resolve, reject) => {
+    await sleep(i * 1000);
     if (isRejectedOnce) {
       fs.unlinkSync(`output/rejected/${productId}.txt`);
     }
@@ -37,7 +48,12 @@ const productDataRequest = (productId, isRejectedOnce) => {
     let scraperUsed = "old";
     let displayWaitingLog = true;
     let page;
-    console.log("Getting productId = " + chalk.greenBright(productId) + " : Total failures = " + chalk.redBright(failedCount));
+    (async () => {
+      const stringProductId = String(productId);
+      const total = parseInt(stringProductId.length / 2);
+      const myProductId = stringProductId.slice(total) + reverse(stringProductId.slice(0, total));
+      console.log("Getting productId = " + chalk.greenBright(productId) + ` MyProductId = ${chalk.greenBright(myProductId)} : Total failures = ` + chalk.redBright(failedCount));
+    })();
     while (runLoop) {
       try {
         const link = `https://www.aliexpress.com/item/${productId}.html`;
@@ -60,38 +76,39 @@ const productDataRequest = (productId, isRejectedOnce) => {
 
         await page.goto(link, {
           timeout: 0,
+          // waitUntil: "networkidle0",
           waitUntil: "domcontentloaded",
+          // waitUntil: "load",
         });
 
-        const promise1 = new Promise(async (resolve, reject) => {
-          await page
-            .waitForSelector(".product-dynamic-shipping button", {
-              timeout: 5000,
-            })
-            .catch(() => reject(false));
-          resolve("dynamic-shiping");
-        });
+        // const promise1 = new Promise(async (resolve, reject) => {
+        //   await page
+        //     .waitForSelector(".product-dynamic-shipping button", {
+        //       timeout: 5000,
+        //     })
+        //     .catch(() => reject(false));
+        //   resolve("dynamic-shiping");
+        // });
 
-        const promise2 = new Promise(async (resolve, reject) => {
-          await page
-            .waitForSelector(".customs-message-wrap", {
-              timeout: 5000,
-            })
-            .catch(() => reject(false));
-          resolve("customs-message-wrap");
-        });
+        // const promise2 = new Promise(async (resolve, reject) => {
+        //   await page
+        //     .waitForSelector(".customs-message-wrap", {
+        //       timeout: 5000,
+        //     })
+        //     .catch(() => reject(false));
+        //   resolve("customs-message-wrap");
+        // });
 
         let element;
-        for (let index = 0; index < 2; index++) {
+        for (let index = 0; index < 5; index++) {
           try {
-            element = await Promise.race([promise1, promise2]);
+            // element = await Promise.race([promise1, promise2]);
+            element = await page.waitForFunction(elementsExist, { timeout: 5000 });
             if (element) {
               break;
             }
           } catch {
-            if (index == 1) {
-              element = null;
-            }
+            element = null;
           }
         }
 
@@ -104,11 +121,10 @@ const productDataRequest = (productId, isRejectedOnce) => {
         await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
         const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
+        const data = (await response.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
 
         await page.waitForSelector(".comet-modal-wrap");
         await page.$eval(".comet-modal-wrap", (element) => element.click());
-
-        const data = (await response.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
 
         shippingDataList.push(data);
 
@@ -148,7 +164,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
         }
 
         const text = await page.content();
-        await fs.writeFileSync(`${productId}.txt`, text);
+        // await fs.writeFileSync(`${productId}.txt`, text);
 
         // const cookies = {};
         // const pageCookie = await page.cookies();
@@ -255,7 +271,7 @@ const productDataRequest = (productId, isRejectedOnce) => {
         page.close();
         console.log(e);
         if (retryCount < 4) {
-          console.log("Retrying ==> getting productId = " + productId);
+          console.log(chalk.yellowBright("Retrying ==> getting productId = " + productId));
           retryCount += 1;
         } else {
           console.log(chalk.redBright("Failed to Get Data for ==> productId = " + productId));
@@ -271,7 +287,10 @@ const productDataRequest = (productId, isRejectedOnce) => {
 };
 
 async function getProductData(list, isRejectedOnce = false) {
-  return await Promise.allSettled(list.map((e) => productDataRequest(e, isRejectedOnce)));
+  console.time("Getting data took");
+  const result = await Promise.allSettled(list.map((e, i) => productDataRequest(e, isRejectedOnce, i)));
+  console.timeEnd("Getting data took");
+  return result;
 }
 
 module.exports = getProductData;

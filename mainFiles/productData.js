@@ -9,7 +9,7 @@ const fs = require("fs");
 const WriteToFile_WithoutCheckingImages = require("../modules/WriteToFile_WithoutCheckingImages");
 const chalk = require("chalk");
 
-const LIMIT = 8 // get 25 products at a time
+global.LIMIT = 10 // get 25 products at a time
 
 function Glob(query) {
   return new Promise((resolve, reject) => {

@@ -3,7 +3,7 @@ const he = require("he");
 const fs = require("fs");
 
 async function oldScraper(data, link, old_productId) {
-  fs.writeFileSync(`output/real_data/${old_productId}.json`, JSON.stringify(data));
+  // fs.writeFileSync(`output/real_data/${old_productId}.json`, JSON.stringify(data));
   if (!data.hasOwnProperty("titleModule")) {
     return false;
   }

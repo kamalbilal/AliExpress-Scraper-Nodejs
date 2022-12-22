@@ -183,11 +183,11 @@ async function searchSingleProducts_main(word) {
 }
 
 async function searchAllProducts() {
-  await startScraper();
+  await startScraper(false);
   main();
 }
 async function searchSingleProduct(word) {
-  await startScraper();
+  await startScraper(false);
   searchSingleProducts_main(word);
 }
 
