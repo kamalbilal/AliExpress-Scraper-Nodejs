@@ -32,14 +32,26 @@ function reverse(s) {
 }
 
 const elementsExist = () => {
-  const element1 = document.querySelector('.product-dynamic-shipping button');
-  const element2 = document.querySelector('.customs-message-wrap');
-  return element1 !== null || element2 !== null;
-}
+  let element1 = document.querySelector(".product-dynamic-shipping button");
+  let element2 = document.querySelector(".customs-message-wrap");
+  if (element1) {
+    return "dynamic-shipping";
+  } else if (element2) {
+    return "customs-message-wrap";
+  } else {
+    return false;
+  }
+};
+// return (element1 !== null ? "dynamic-shipping" : null) || (element2 !== null ? "customs-message-wrap" : null);
+
+const elementExist = () => {
+  const element1 = document.querySelector(".product-dynamic-shipping button");
+  return element1 !== null;
+};
 
 const productDataRequest = (productId, isRejectedOnce, i) => {
   return new Promise(async (resolve, reject) => {
-    await sleep(i * 1000);
+    // await sleep(i * 500);
     if (isRejectedOnce) {
       fs.unlinkSync(`output/rejected/${productId}.txt`);
     }
@@ -74,36 +86,17 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
         });
         await page.setCookie(...cookieConverter(defaultCookies));
 
-        await page.goto(link, {
+        page.goto(link, {
           timeout: 0,
           // waitUntil: "networkidle0",
           waitUntil: "domcontentloaded",
           // waitUntil: "load",
         });
 
-        // const promise1 = new Promise(async (resolve, reject) => {
-        //   await page
-        //     .waitForSelector(".product-dynamic-shipping button", {
-        //       timeout: 5000,
-        //     })
-        //     .catch(() => reject(false));
-        //   resolve("dynamic-shiping");
-        // });
-
-        // const promise2 = new Promise(async (resolve, reject) => {
-        //   await page
-        //     .waitForSelector(".customs-message-wrap", {
-        //       timeout: 5000,
-        //     })
-        //     .catch(() => reject(false));
-        //   resolve("customs-message-wrap");
-        // });
-
         let element;
         for (let index = 0; index < 5; index++) {
           try {
-            // element = await Promise.race([promise1, promise2]);
-            element = await page.waitForFunction(elementsExist, { timeout: 5000 });
+            element = await (await page.waitForFunction(elementsExist, { timeout: 20000 })).jsonValue();
             if (element) {
               break;
             }
@@ -118,7 +111,9 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
           return;
         }
 
-        await page.$eval(".product-dynamic-shipping button", (element) => element.click());
+        await page.waitForFunction(elementExist, { timeout: 20000 });
+        await page.click(".product-dynamic-shipping button");
+        // await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
         const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
         const data = (await response.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
@@ -136,9 +131,10 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
             element.click();
           });
 
-          await page.waitForSelector(".product-dynamic-shipping button", {
-            timeout: 5000,
-          });
+          // await page.waitForSelector(".product-dynamic-shipping button", {
+          //   timeout: 5000,
+          // });
+          await page.waitForFunction(elementExist, { timeout: 20000 });
           await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
           const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
@@ -164,14 +160,6 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
         }
 
         const text = await page.content();
-        // await fs.writeFileSync(`${productId}.txt`, text);
-
-        // const cookies = {};
-        // const pageCookie = await page.cookies();
-        // pageCookie.map((el) => {
-        //   cookies[el.name] = el.value;
-        // });
-        // console.log(cookies);
 
         await page.close();
         // await browser.close();

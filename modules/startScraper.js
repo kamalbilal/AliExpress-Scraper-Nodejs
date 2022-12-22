@@ -14,14 +14,30 @@ async function startScraper(launchBrowser = true) {
     global.browser = await puppeteer.launch({
       headless: true,
       args: [
+        // "--no-sandbox",
+        // "--disable-setuid-sandbox",
+        // "--disable-dev-shm-usage",
+        // "--disable-accelerated-2d-canvas",
+        // "--no-first-run",
+        // "--no-zygote",
+        // "--single-process", // <- this one doesn't works in Windows
+        // "--disable-gpu",
+        "--speed",
+        "--disable-dev-shm-usage",
+        "--single-process",
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
         "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process", // <- this one doesn't works in Windows
         "--disable-gpu",
+        "--no-first-run",
+        "--fast-start",
+        "--disable-background-networking",
+        "--no-zygote",
+        "--max-old-space-size=1024",
+        "--enable-precise-memory-info",
+        "--disable-extensions",
+        "--disable-popup-blocking",
+        "--ignore-certificate-errors",
       ],
     });
     console.log("Booting Scraper with browser....");
