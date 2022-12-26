@@ -19,6 +19,8 @@
     "pg": "^8.8.0",
     "prompt-sync": "^4.2.0",
     "puppeteer": "^19.4.1",
-    "rimraf": "^3.0.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.1",
+    "rimraf": "^3.0.2",
+    "user-agents": "^1.0.1240"
   }
 }

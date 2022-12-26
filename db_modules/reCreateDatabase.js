@@ -8,7 +8,8 @@ const queries = [
   `CREATE TABLE shop.t_productid (
     id SERIAL PRIMARY KEY,
     productId BigInt unique NOT NULL,
-    myProductId BigInt unique NOT NULL
+    myProductId BigInt unique NOT NULL,
+    created_at_timestamp timestamp DEFAULT current_timestamp
   );`,
   `create index idx_productId on shop.t_productid(productId);`,
   `create index idx_myProductId on shop.t_productid(myProductId);`,
@@ -29,7 +30,6 @@ const queries = [
     country varchar(10)
   );`,
   `create index idx_priceList_foreign_id on shop.t_pricelist(foreign_id);`,
-
 
   ` CREATE TABLE shop.t_specs (
     id SERIAL PRIMARY KEY,
@@ -139,7 +139,8 @@ const queries = [
       id SERIAL PRIMARY KEY,
       email character varying(100) unique,
       password varchar(75),
-      cartCount INT DEFAULT 0
+      cartCount INT DEFAULT 0,
+      created_at_timestamp timestamp DEFAULT current_timestamp
       );`,
   // data jsonb DEFAULT '{"cart": {}}'::jsonb
   `create index idx_users_email on shop.t_users(email);`,
@@ -156,9 +157,12 @@ const queries = [
     discount Decimal(6, 2) DEFAULT 0.0,
     selectedProperties jsonb DEFAULT '{}'::jsonb NOT NULL,
     shippingDetails jsonb DEFAULT '{}'::jsonb NOT NULL,
+    created_at integer DEFAULT floor(extract(epoch from now())::integer),
+    created_at_timestamp timestamp DEFAULT current_timestamp,
     UNIQUE(foreign_user_id, cartName)
     );`,
 
+  `create index idx_foreign_product_created_at on shop.t_cart(created_at);`,
   `create index idx_foreign_product_id on shop.t_cart(foreign_product_id);`,
   `create index idx_foreign_user_id on shop.t_cart(foreign_user_id);`,
   `create index idx_cartName on shop.t_cart(cartName);`,
@@ -167,9 +171,11 @@ const queries = [
     id SERIAL PRIMARY KEY,
     foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
     wishListName varchar(60) NOT NULL,
+    created_at integer DEFAULT floor(extract(epoch from now())::integer),
     UNIQUE(foreign_user_id, wishListName)
     );`,
 
+  `create index idx_t_wishList_foreign_user_created_at on shop.t_wishList(created_at);`,
   `create index idx_t_wishList_foreign_user_id on shop.t_wishList(foreign_user_id);`,
   `create index idx_wishListName on shop.t_wishList(wishListName);`,
 
@@ -179,13 +185,14 @@ const queries = [
     foreign_product_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
     foreign_wishList_id INT REFERENCES shop.t_wishList(id) ON DELETE CASCADE NOT NULL,
     selectedImageUrl varchar(250) NOT NULL,
+    created_at integer DEFAULT floor(extract(epoch from now())::integer),
     UNIQUE(foreign_user_id, foreign_product_id)
     );`,
 
+  `create index idx_t_wishList_products_foreign_user_created_at on shop.t_wishList_products(created_at);`,
   `create index idx_t_wishList_products_foreign_user_id on shop.t_wishList_products(foreign_user_id);`,
   `create index idx_t_wishList_products_foreign_product_id on shop.t_wishList_products(foreign_product_id);`,
   `create index idx_t_wishList_products_foreign_wishList_id on shop.t_wishList_products(foreign_wishList_id);`,
-
 ];
 
 async function reCreateDataBase() {
@@ -196,4 +203,4 @@ async function reCreateDataBase() {
   console.log("Successfully Created Database...");
 }
 
-module.exports = reCreateDataBase
+module.exports = reCreateDataBase;
