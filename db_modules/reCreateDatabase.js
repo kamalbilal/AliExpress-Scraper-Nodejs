@@ -24,9 +24,9 @@ const queries = [
   ` CREATE TABLE shop.t_pricelist (
     id SERIAL PRIMARY KEY,
     foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
-    byName jsonb[],
-    byNumber jsonb[],
-    byData jsonb[],
+    byName jsonb,
+    byNumber jsonb,
+    byData jsonb,
     country varchar(10)
   );`,
   `create index idx_priceList_foreign_id on shop.t_pricelist(foreign_id);`,
@@ -34,7 +34,7 @@ const queries = [
   ` CREATE TABLE shop.t_specs (
     id SERIAL PRIMARY KEY,
     foreign_id int REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL,
-    specs jsonb[]
+    specs jsonb
   );`,
   `create index idx_specs_foreign_id on shop.t_specs(foreign_id);`,
 
@@ -130,7 +130,7 @@ const queries = [
 
   ` CREATE TABLE shop.t_properties (
       id SERIAL PRIMARY KEY,
-      property_array jsonb[],
+      property_array jsonb,
       foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_properties_foreign_id on shop.t_properties(foreign_id);`,

@@ -43,9 +43,12 @@ async function creatingPriceListQueries(id, priceList) {
       insertIntoColumns: ["foreign_id", "byName", "byNumber", "byData", "country"],
       values: [
         id,
-        priceList.InNames ? `ARRAY [${priceList.InNames.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
-        priceList.InNumbers ? `ARRAY [${priceList.InNumbers.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
-        `ARRAY [${priceList.Data.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`,
+        // priceList.InNames ? `ARRAY [${priceList.InNames.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
+        // priceList.InNumbers ? `ARRAY [${priceList.InNumbers.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null",
+        // `ARRAY [${priceList.Data.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`,
+        priceList.InNames ? `'${JSON.stringify(priceList.InNames)}'::jsonb` : "null",
+        priceList.InNumbers ? `'${JSON.stringify(priceList.InNumbers)}'::jsonb` : "null",
+        `'${JSON.stringify(priceList.Data)}'::jsonb`,
         `$$${priceList.country}$$`,
       ],
     },
@@ -65,7 +68,10 @@ async function creatingSpecsQueries(id, specs) {
   const temp = [];
   temp.push({
     table: "shop.t_specs",
-    mainQuery: { method: "INSERT", tableName: "shop.t_specs", insertIntoColumns: ["foreign_id", "specs"], values: [id, `ARRAY [${specs.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`] },
+    mainQuery: { method: "INSERT", tableName: "shop.t_specs", insertIntoColumns: ["foreign_id", "specs"], values: [id, 
+      // `ARRAY [${specs.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`
+      `'${JSON.stringify(specs)}'::jsonb`
+    ] },
   });
   return temp;
 }
@@ -304,7 +310,7 @@ async function creatingPropertyQueries(id, sizesColors) {
       method: "INSERT",
       tableName: "shop.t_properties",
       insertIntoColumns: ["foreign_id", "property_array"],
-      values: [id, sizesColors ? `ARRAY [${sizesColors.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]` : "null"],
+      values: [id, sizesColors ? `'${JSON.stringify(sizesColors)}'::jsonb` : "null"],
     },
   });
   return temp;
