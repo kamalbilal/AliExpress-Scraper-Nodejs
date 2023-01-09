@@ -115,8 +115,11 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
         await page.click(".product-dynamic-shipping button");
         // await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
-        const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
-        const data = (await response.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
+        // const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
+        const response = await page.waitForResponse((response) => response.url().includes("/h5/mtop.aliexpress.itemdetail.queryexpression/1.0/"));
+        let data = (await response.json())
+        // fs.writeFileSync("test.json", JSON.stringify(data))
+        data = data["data"]["data"]["deliveryExpressionResponse"]["originalLayoutResultList"].map((el) => el["bizData"]);
 
         await page.waitForSelector(".comet-modal-wrap");
         await page.$eval(".comet-modal-wrap", (element) => element.click());
@@ -137,7 +140,8 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
           await page.waitForFunction(elementExist, { timeout: 20000 });
           await page.$eval(".product-dynamic-shipping button", (element) => element.click());
 
-          const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
+          // const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
+          const response2 = await page.waitForResponse((response) => response.url().includes("/h5/mtop.aliexpress.itemdetail.queryexpression/1.0/"));
 
           const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
           shippingDataList.push(data2);

@@ -226,7 +226,9 @@ async function creatingMainImagesQueries(id, images) {
       method: "INSERT",
       tableName: "shop.t_mainImages",
       insertIntoColumns: ["foreign_id", "image_link_array"],
-      values: [id, `ARRAY [${images.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`],
+      values: [id, `'[${images.map((el) => `"${el}"`)}]'::jsonb`],
+      // values: [id, `jsonb_build_array(${images.map((el) => `'"${el}"'`).join(",")})`],
+      // values: [id, `ARRAY [${images.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`],
     },
   });
   return temp;
@@ -239,7 +241,8 @@ async function creatingShippingDetailsQueries(id, shippingDetails) {
       method: "INSERT",
       tableName: "shop.t_shippingDetails",
       insertIntoColumns: ["foreign_id", "shipping"],
-      values: [id, `ARRAY [${shippingDetails.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`],
+      values: [id, `'${JSON.stringify(shippingDetails)}'::jsonb`],
+      // values: [id, `ARRAY [${shippingDetails.map((el) => `$$${JSON.stringify(el)}$$::jsonb`)}]`],
     },
   });
 

@@ -80,7 +80,7 @@ const queries = [
 
   `CREATE TABLE shop.t_shippingdetails (
     	id SERIAL PRIMARY KEY,
-    	shipping jsonb[],
+    	shipping jsonb,
     	foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_shippingdetails_foreign_id on shop.t_shippingdetails(foreign_id);`,
@@ -123,7 +123,7 @@ const queries = [
 
   ` CREATE TABLE shop.t_mainImages (
       id SERIAL PRIMARY KEY,
-      image_link_Array jsonb[],
+      image_link_Array jsonb,
       foreign_id INT REFERENCES shop.t_productid(id) ON DELETE CASCADE NOT NULL
     );`,
   `create index idx_mainImages_foreign_id on shop.t_mainImages(foreign_id);`,
