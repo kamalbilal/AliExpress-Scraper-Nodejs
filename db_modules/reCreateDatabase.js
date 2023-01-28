@@ -171,7 +171,7 @@ const queries = [
     id SERIAL PRIMARY KEY,
     foreign_user_id INT REFERENCES shop.t_users(id) ON DELETE CASCADE NOT NULL,
     wishListName varchar(60) NOT NULL,
-    created_at integer DEFAULT floor(extract(epoch from now())::integer),
+    created_at integer NOT NULL,
     UNIQUE(foreign_user_id, wishListName)
     );`,
 

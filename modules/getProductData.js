@@ -118,7 +118,7 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
         // const response = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
         const response = await page.waitForResponse((response) => response.url().includes("/h5/mtop.aliexpress.itemdetail.queryexpression/1.0/"));
         let data = (await response.json())
-        // fs.writeFileSync("test.json", JSON.stringify(data))
+        // fs.writeFileSync("test.json", JSON.stringify(data["data"]["data"]["deliveryExpressionResponse"]["originalLayoutResultList"]))
         data = data["data"]["data"]["deliveryExpressionResponse"]["originalLayoutResultList"].map((el) => el["bizData"]);
 
         await page.waitForSelector(".comet-modal-wrap");
@@ -143,7 +143,9 @@ const productDataRequest = (productId, isRejectedOnce, i) => {
           // const response2 = await page.waitForResponse((response) => response.url().includes("mtop.global.expression.dynamic.component.queryoptionforitem"));
           const response2 = await page.waitForResponse((response) => response.url().includes("/h5/mtop.aliexpress.itemdetail.queryexpression/1.0/"));
 
-          const data2 = (await response2.json())["data"]["originalLayoutResultList"].map((el) => el["bizData"]);
+          let data2 = await response2.json()
+          // fs.writeFileSync("test.json", JSON.stringify(data2))
+          data2 = data2["data"]["data"]["deliveryExpressionResponse"]["originalLayoutResultList"].map((el) => el["bizData"]);
           shippingDataList.push(data2);
         }
 
